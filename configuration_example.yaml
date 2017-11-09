@@ -3,7 +3,19 @@
 ###################################
 switch:
   - platform: securitasswitch
-    # Name - the name you want to give your alarm in Home Assistant
+    # Name - the name you want to give your switch in Home Assistant
+    name: "Home Alarm"
+    # Username - your username to Securitas
+    username: "username"
+    # Password - your password to Securitas
+    password: "password"
+
+###################################
+##  Sensor to check on/off status
+###################################
+sensor:
+  - platform: securitassensor
+    # Name - the name you want to give your sensor in Home Assistant
     name: "Home Alarm"
     # Username - your username to Securitas
     username: "username"

@@ -1,5 +1,9 @@
 # home-assistant-securitas
-A Home Assistant component Switch for turning on and off Securitas Home Alarm
+A collection of Home Assistant components for Securitas Home Alarm
+
+The collection contains:
+* Switch for turning on and off Securitas Home Alarm
+* Sensor to detect the status of the Home Alarm
 
 ### Legal Disclaimer
 This software is not affiliated with Securitas and the developers take no legal responsibility for the functionality or security of your Securitas Alarms and devices.
