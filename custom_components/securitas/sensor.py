@@ -46,11 +46,15 @@ class SecuritasClientAPI(object):
         url = self._base_url + '/' + self._property_id + '/devices/alarmpanels?format=json'
         result = self._do_request("GET", url, '')
         self._panel_type = result.json()[0]['__type']
+        
+        #_LOGGER.info('Alarm status ' + str(result.json()[0]['PanelStatus']))
 
         if result.json()[0]['PanelStatus'] == 1:
-            return "På"
+            return "On"
+        elif result.json()[0]['PanelStatus'] == 2:
+            return "Home"
         else:
-            return "Av"
+            return "Off"
 
 
 CONF_NAME = 'name'
@@ -88,7 +92,9 @@ class SecuritasSensor(Entity):
     def update(self):
         self._state = self.client.get_alarm_status()
 
-        if self._state == "På":
+        if self._state == "On":
             self._icon = 'mdi:lock'
+        elif self._state == "Home":
+            self._icon = 'mdi:account-lock'
         else:
             self._icon = 'mdi:lock-open-outline'
