@@ -5,6 +5,13 @@ from homeassistant.helpers.entity import Entity
 
 import requests
 
+from homeassistant.const import (
+    STATE_ALARM_ARMED_AWAY,
+    STATE_ALARM_ARMED_HOME,
+    STATE_ALARM_DISARMED,
+    STATE_ALARM_PENDING,
+)
+
 _LOGGER = logging.getLogger(__name__)
 
 class SecuritasClientAPI(object):
@@ -50,11 +57,11 @@ class SecuritasClientAPI(object):
         #_LOGGER.info('Alarm status ' + str(result.json()[0]['PanelStatus']))
 
         if result.json()[0]['PanelStatus'] == 1:
-            return "On"
+            return STATE_ALARM_ARMED_AWAY
         elif result.json()[0]['PanelStatus'] == 2:
-            return "Home"
+            return STATE_ALARM_ARMED_HOME
         else:
-            return "Off"
+            return STATE_ALARM_DISARMED
 
 
 CONF_NAME = 'name'
