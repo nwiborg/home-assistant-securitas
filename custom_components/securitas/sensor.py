@@ -99,9 +99,9 @@ class SecuritasSensor(Entity):
     def update(self):
         self._state = self.client.get_alarm_status()
 
-        if self._state == "On":
+        if self._state == STATE_ALARM_ARMED_AWAY:
             self._icon = 'mdi:lock'
-        elif self._state == "Home":
+        elif self._state == STATE_ALARM_ARMED_HOME:
             self._icon = 'mdi:account-lock'
         else:
             self._icon = 'mdi:lock-open-outline'
