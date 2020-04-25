@@ -11,6 +11,13 @@ from homeassistant.const import (STATE_OFF, STATE_ON, CONF_NAME, CONF_SWITCHES)
 import requests
 import time
 
+from homeassistant.const import (
+    STATE_ALARM_ARMED_AWAY,
+    STATE_ALARM_ARMED_HOME,
+    STATE_ALARM_DISARMED,
+    STATE_ALARM_PENDING,
+)
+
 _LOGGER = logging.getLogger(__name__)
 
 class SecuritasClientAPI(object):
@@ -55,9 +62,11 @@ class SecuritasClientAPI(object):
         self._panel_type = result.json()[0]['__type']
 
         if result.json()[0]['PanelStatus'] == 1:
-            return True
+            return STATE_ALARM_ARMED_AWAY
+        elif result.json()[0]['PanelStatus'] == 2:
+            return STATE_ALARM_ARMED_HOME
         else:
-            return False
+            return STATE_ALARM_DISARMED
 
     def set_alarm_status(self, action):
         
@@ -80,29 +89,38 @@ CONF_NAME = 'name'
 CONF_USERNAME = 'username'
 CONF_PASSWORD = 'password'
 
+
 def setup_platform(hass, config, add_devices, discovery_info=None):
 
     my_name = config.get(CONF_NAME)
     my_username = config.get(CONF_USERNAME)
     my_password = config.get(CONF_PASSWORD)
-    add_devices([SecuritasSwitch(my_name, my_username, my_password)])
+    add_devices([SecuritasSwitch(hass, my_name, my_username, my_password)])
 
 
 
 class SecuritasSwitch(SwitchDevice):
 
-    def __init__(self, name, username, password):
+    def __init__(self, hass, name, username, password):
         _LOGGER.info("Initialized Securitas SWITCH %s", name)
+        self._hass = hass
+        self._hass.custom_attributes = {}
         self._name = name
         self._icon = 'mdi:lock-open-outline'
         self._armed = False
+        self._state = STATE_ALARM_DISARMED
         self._last_updated = 0
         self.client = SecuritasClientAPI(username, password)
         self.update()
 
-    def _set_as_armed(self):
+    def _set_as_armed_away(self):
         self._last_updated = time.time()
         self._icon = 'mdi:lock'
+        self._armed = True
+
+    def _set_as_armed_home(self):
+        self._last_updated = time.time()
+        self._icon = 'mdi:account-lock'
         self._armed = True
 
     def _set_as_disarmed(self):
@@ -123,13 +141,18 @@ class SecuritasSwitch(SwitchDevice):
         self._set_as_disarmed()
 
     def update(self):
-        _LOGGER.info("Initialized Securitas SWITCH %s", self._last_updated)
+        _LOGGER.info("Updated Securitas SWITCH %s", self._name)
         diff = time.time() - self._last_updated
-
+        
         if diff > 15:
-            self._armed = self.client.get_alarm_status()
-            if self._armed == True:
-                self._set_as_armed()
+            self._state = self.client.get_alarm_status()
+            attributes = {}
+            attributes['state'] = self._state
+            self._hass.custom_attributes = attributes
+            if self._state == STATE_ALARM_ARMED_AWAY:
+                self._set_as_armed_away()
+            elif self._state == STATE_ALARM_ARMED_HOME:
+                self._set_as_armed_home()
             else:
                 self._set_as_disarmed()
 
@@ -137,6 +160,11 @@ class SecuritasSwitch(SwitchDevice):
     def is_on(self):
         """Return true if device is on."""
         return self._armed
+
+    @property
+    def device_state_attributes(self):
+        """Return the state attributes of the sensor."""
+        return self._hass.custom_attributes
 
     @property
     def name(self):
