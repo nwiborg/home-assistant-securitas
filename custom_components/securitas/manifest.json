@@ -1,8 +1,8 @@
 {
   "domain": "securitas",
   "name": "Securitas",
-  "documentation": "https://www.example.com",
+  "documentation": "https://github.com/nwiborg/home-assistant-securitas/blob/master/README.md",
   "dependencies": [],
-  "codeowners": [],
+  "codeowners": [nwiborg, vlumikero],
   "requirements": []
 }
