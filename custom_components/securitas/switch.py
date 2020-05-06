@@ -46,31 +46,6 @@ class SecuritasSwitch(SwitchDevice):
         self._client = client
         self.update()
 
-    def _set_as_armed(self):
-        if self._mode == STATE_ALARM_ARMED_AWAY:
-            self._set_as_armed_away()
-        else:
-            self._set_as_armed_home()
-
-    def _set_as_armed_away(self):
-        self._last_updated = time.time()
-        self._icon = 'mdi:lock'
-        self._mode = STATE_ALARM_ARMED_AWAY
-
-    def _set_as_armed_home(self):
-        self._last_updated = time.time()
-        self._icon = 'mdi:account-lock'
-        self._mode = STATE_ALARM_ARMED_HOME
-
-    def _set_as_disarmed(self):
-        self._last_updated = time.time()
-        self._icon = 'mdi:lock-open-outline'
-
-    def _set_as_pending(self):
-        self._last_updated = time.time()
-        self._icon = 'mdi:lock-clock'
-        self._state == STATE_ALARM_PENDING
-
     def _set_icon(self):
         if self._state == STATE_ALARM_ARMED_AWAY:
             self._icon = 'mdi:shield-key'
@@ -83,18 +58,17 @@ class SecuritasSwitch(SwitchDevice):
 
         _LOGGER.debug("Update Securitas icon to %s", self._icon)
 
-
     def turn_on(self, **kwargs):
         """Turn device on."""
         _LOGGER.debug("Update Securitas SWITCH to on, mode %s ", self._mode)
+        self._last_updated = time.time()
         self._client.set_alarm_status(self._mode)
-        #self._set_as_pending()
         
     def turn_off(self, **kwargs):
         """Turn device off."""
         _LOGGER.debug("Update Securitas SWITCH to off")
+        self._last_updated = time.time()
         self._client.set_alarm_status(STATE_ALARM_DISARMED)
-        #self._set_as_pending()
 
     def update(self):
         _LOGGER.debug("Updated Securitas SWITCH %s", self._name)
@@ -110,7 +84,7 @@ class SecuritasSwitch(SwitchDevice):
         
     @property
     def is_on(self):
-        """Return true if device is on."""
+        """Return true if device is switching on or is on."""
         return self._client.target_state == self._mode
 
     @property
