@@ -17,7 +17,7 @@ from homeassistant.const import (
     STATE_ALARM_ARMED_AWAY,
     STATE_ALARM_ARMED_HOME,
     STATE_ALARM_DISARMED,
-    STATE_ALARM_PENDING,
+    STATE_ALARM_PENDING
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,9 +30,9 @@ DOMAIN = 'securitas'
 # }
 
 # RESOURCES = [
-#     'armed_state',
-#     'armed_away',
-#     'armed_home',
+#     'armed_state_sensor',
+#     'armed_away_switch',
+#     'armed_home_switch',
 # ]
 
 CONFIG_SCHEMA = vol.Schema({
@@ -76,7 +76,9 @@ class SecuritasClientAPI(object):
         self._username = username
         self._password = password
         self._property_id = 0
+        self._last_updated = 0
         self._panel_type = ''
+        self._target_state = STATE_ALARM_DISARMED
         self._state = self.get_alarm_status()
 
     def _do_request(self, request_type, url, payload):
@@ -108,16 +110,29 @@ class SecuritasClientAPI(object):
         self._panel_type = result.json()[0]['__type']
 
         if result.json()[0]['PanelStatus'] == 1:
-            return STATE_ALARM_ARMED_AWAY
+            self._state = STATE_ALARM_ARMED_AWAY
         elif result.json()[0]['PanelStatus'] == 2:
-            return STATE_ALARM_ARMED_HOME
+            self._state = STATE_ALARM_ARMED_HOME
         else:
-            return STATE_ALARM_DISARMED
+            self._state = STATE_ALARM_DISARMED
+
+        _LOGGER.debug("Get Securitas alarm state: %s", self._state)
+        _LOGGER.debug("Target Securitas alarm state: %s", self._target_state)
+        
+        if self._state == self._target_state:
+        	return self._state
+        else:
+        	return STATE_ALARM_PENDING
 
     def set_alarm_status(self, action):
 
         _LOGGER.debug("Setting Securitas alarm panel to %s", action)
         
+        self._last_updated = time.time()
+
+        self._target_state = action
+        self._state = STATE_ALARM_PENDING
+
         if action == STATE_ALARM_ARMED_AWAY:
             status_name = "ArmedAway"
         elif action == STATE_ALARM_ARMED_HOME:
@@ -131,10 +146,36 @@ class SecuritasClientAPI(object):
         url = self._base_url + '/' + self._property_id + '/devices/alarmpanel'
         payload = "<?xml version='1.0' encoding='utf-8'?><AlarmPanel xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema' xsi:type='" + self._panel_type + "'><PanelStatus>" + status_name + "</PanelStatus></AlarmPanel>"
         self._do_request("PUT", url, payload)
-        self._state = STATE_ALARM_PENDING
         return
 
+    def update(self):
+        _LOGGER.debug("Updated Securitas %s", self._name)
+        diff = time.time() - self._last_updated
+        
+        if diff > 15:
+            self.get_alarm_status()
+            """
+            if self.state == STATE_ALARM_ARMED_AWAY:
+                self._set_as_armed_away()
+            elif self.state == STATE_ALARM_ARMED_HOME:
+                self._set_as_armed_home()
+            else:
+                self._set_as_disarmed()
+			"""
+
+	
+    
     @property
-    def state(self):
-        """Return the state of the device."""
-        return self._state
+    def target_state(self):
+        return self._target_state
+
+    """
+    @state.setter
+    def state(self, s):
+    	#save prev state when state is changed
+    	_LOGGER.debug("Changing Securitas alarm panel state to %s", s)
+    	if self._prev_state != s:
+        	_LOGGER.debug("Saving Securitas prev state as %s", self._state)
+        	self._prev_state = self._state
+        self._state = s
+    """

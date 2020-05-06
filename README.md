@@ -2,8 +2,8 @@
 A collection of Home Assistant components for Securitas Home Alarm
 
 The collection contains:
-* Switch for arming Securitas Home Alarm
-* Switch for changing between Away and Home mode (does not arm the alarm panel)
+* Switch for arming Securitas Home Alarm in Away Mode
+* Switch for arming Home mode
 * Sensor to detect the status of the Home Alarm
 
 ### Legal Disclaimer
