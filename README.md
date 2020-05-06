@@ -5,6 +5,7 @@ The platform contains:
 * Switch for arming Securitas Home Alarm in Away Mode
 * Switch for arming Home mode
 * Sensor to detect the status of the Home Alarm
+* Alarm control panel that can be used with the corresponding Lovelace card
 
 ### Legal Disclaimer
 This software is not affiliated with Securitas and the developers take no legal responsibility for the functionality or security of your Securitas Alarms and devices.
