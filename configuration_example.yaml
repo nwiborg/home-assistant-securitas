@@ -1,23 +1,11 @@
-###################################
-##  Switch for on/off control
-###################################
-switch:
-  - platform: securitasswitch
-    # Name - the name you want to give your switch in Home Assistant
-    name: "Home Alarm"
-    # Username - your username to Securitas
-    username: "username"
-    # Password - your password to Securitas
-    password: "password"
+#######################################################
+##  Platform Securitas, adds sensor and arming switches
+#######################################################
 
-###################################
-##  Sensor to check on/off status
-###################################
-sensor:
-  - platform: securitassensor
-    # Name - the name you want to give your sensor in Home Assistant
+securitas:
+    # Name for components
     name: "Home Alarm"
     # Username - your username to Securitas
-    username: "username"
+    username: !secret securitas_user
     # Password - your password to Securitas
-    password: "password"
+    password: !secret securitas_pw

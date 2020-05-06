@@ -3,6 +3,6 @@
   "name": "Securitas",
   "documentation": "https://github.com/nwiborg/home-assistant-securitas/blob/master/README.md",
   "dependencies": [],
-  "codeowners": [nwiborg, vlumikero],
+  "codeowners": ["@nwiborg", "@vlumikero"],
   "requirements": []
 }
